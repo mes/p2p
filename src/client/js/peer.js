@@ -13,16 +13,27 @@ class Peer {
 
     this.signaling = new Signaling(config);
     this.serviceWorker = new ServiceWorkerMiddleware(config);
-
-    this.stunServer = config.stunServer;
+    this.stunServer = { iceServers: [] }
+    if(config.stunServer &&
+      config.stunServer.iceServers.length !== 0 &&
+      config.stunServer.iceServers[0].urls !== '') {
+      this.stunServer = config.stunServer;
+    }
     this.peerId = this.config.clientId;
     this.peers = [];
     this.requests = [];
-    this.cacheNotification = [];
     this.channel = config.channel;
+    this.pendingResourceRequests = {};
 
     this.message = Object.freeze({
-      types: {addedResource: 1, removedResource: 2, request: 3, chunk: 4, response: 5},
+      types: {
+        addedResource: 1,
+        removedResource: 2,
+        startedDownload: 3,
+        request: 4,
+        chunk: 5,
+        response: 6
+      },
       sizes: { // in byte
         type: 1,
         peerId: config.idLength,
@@ -114,14 +125,12 @@ class Peer {
 
   _getRequestId(from, hash) {
     let idx = -1;
-
     for (let i = 0; i < this.requests.length; i++) {
       if (this.requests[i].from === from && this.requests[i].hash === hash) {
         idx = i;
         break;
       }
     }
-
     return idx;
   }
 
@@ -146,8 +155,9 @@ class Peer {
     this.logDetail('local session created: %o', desc);
 
     const peer = this._getPeer(peerId);
-
+    if(typeof peer.con === 'undefined') return;
     peer.con.setLocalDescription(desc).then(() => {
+      if(typeof peer.con === 'undefined') return;
       this.logDetail('sending local desc: %o', peer.con.localDescription);
       this.signaling.send(peer.id, peer.con.localDescription);
     });
@@ -159,17 +169,36 @@ class Peer {
 
   _sendViaDataChannel(peer, message) {
     const state = this._getStateFor(peer);
-
+    var send = function(msg) {
+      try{
+        // maximum buffer size is 16mb
+        if(peer.dataChannel.bufferedAmount <= 16000000) {
+          peer.dataChannel.send(msg);
+          return;
+        }
+        // if maximum buffersize is reached delay sending of chunks
+        peer.requestQueue.push(msg);
+        peer.dataChannel.bufferedAmountLowThreshold = 65536;
+        peer.dataChannel.onbufferedamountlow = function () {
+          var reqs = peer.requestQueue.slice();
+          peer.requestQueue = [];
+          reqs.forEach(_msg => send(_msg));
+        }
+      } catch(error) {
+        if (console) {
+          console.log(error);
+        }
+      }
+    }
     switch (state) {
       case 'connecting':
         this.logDetail('connection not open; queueing: %s', message);
         peer.requestQueue.push(message);
         break;
       case 'open':
-        if (peer.requestQueue.length === 0) {
-          peer.dataChannel.send(message);
-        } else {
-          peer.requestQueue.forEach(msg => peer.dataChannel.send(msg));
+        send(message);
+        if(peer.requestQueue.size >= 1) {
+          peer.requestQueue.forEach(msg => send(msg));
           peer.requestQueue = [];
         }
         break;
@@ -194,7 +223,6 @@ class Peer {
     } else {
       msg = concatAbs([typeAb, fromAb, hashAb]);
     }
-
     this._sendViaDataChannel(peer, msg);
   }
 
@@ -204,16 +232,38 @@ class Peer {
     this.log('Request resource %s from peer %s', hash, peer.id);
     this._sendToPeer(peer, msgType, hash);
     this.requests.push(request);
+
+    // Remove request after timeout to prevent dangling requests
+    setTimeout(() => {
+      request.respond({'error': 'Not finished in time'})
+      this._removeRequest(peer.id, hash);
+    }, 20000)
   }
 
   _addResource(peer, resource) {
     if (peer.resources.indexOf(resource) === -1) {
       peer.resources.push(resource);
+      const index = peer.downloadingResources.indexOf(resource);
+      if (index !== -1) {
+        this._triggerPendingRequestsFor(peer, resource);
+        peer.downloadingResources.splice(index, 1);
+      }
       this._updateUI();
     }
   }
 
-  _removeResource(peer, resource) {
+  _addResourcesFrom(peer, resources) {
+    for(var i = 0; i < resources.length; i += 1) {
+      this._addResource(peer, resources[i]);
+    }
+  }
+
+  _startedDownloadFrom(peer, resource) {
+    this.log('Peer %s started to download resource %s', peer.id, resource)
+    peer.downloadingResources.push(resource)
+  }
+
+  _removeResourceFrom(peer, resource) {
     const index = peer.resources.indexOf(resource)
     if (index !== -1) {
       peer.resources.splice(index,1)
@@ -221,24 +271,14 @@ class Peer {
     }
   }
 
-  _checkCache() {
-    // TODO: extract and write test
+  _checkCache(peer) {
     const cb = cachedResources => {
       this.logDetail('cached resources %o', cachedResources);
       if (cachedResources && cachedResources.length > 0) {
-        this.peers.forEach(peer => {
-          const alreadySent = this.cacheNotification.indexOf(peer.id) >= 0;
-
-          if (!alreadySent) {
-            cachedResources.forEach(hash => {
-              if (peer.dataChannel) {
-                this.logDetail('update %s about cached resource %s', peer.id, hash);
-                this.cacheNotification.push(peer.id);
-                this._sendToPeer(peer, this.message.types.addedResource, hash);
-              }
-            });
-          }
-        });
+        if (peer.dataChannel) {
+          this.logDetail('update %s about cached resources', peer.id);
+          this._sendToPeer(peer, this.message.types.addedResource, cachedResources[0], strToAb(cachedResources.toString()));
+        }
       }
     };
     document.dispatchEvent(
@@ -294,7 +334,7 @@ class Peer {
     }
 
     // Get response
-    if (message.type === this.message.types.response) {
+    if (message.type === this.message.types.response || message.type === this.message.types.addedResource) {
       chunkStart = chunkEnd;
       message.data = new Uint8Array(ab.slice(chunkStart));
     }
@@ -302,7 +342,17 @@ class Peer {
     return message;
   }
 
-// TODO Adapt for delete
+  _triggerPendingRequestsFor(peer, resource) {
+    const pendingRequests = this.pendingResourceRequests[peer.id];
+    if (typeof pendingRequests === 'undefined' ||
+      typeof pendingRequests[resource] === 'undefined') {
+      return;
+    }
+    const resourceRequest = pendingRequests[resource]
+    this.requestResourceFromPeers(resource, resourceRequest.cb);
+    delete this.pendingResourceRequests[peer.id][resource]
+  }
+
   _handleUpdate(message, type) {
     const peer = this._getPeer(message.from);
     if (!peer) {
@@ -311,12 +361,15 @@ class Peer {
     }
 
     this.logDetail('updated peer %s with resource %s', message.from, message.hash);
-    if(type == this.message.types.addedResource){
-      this._addResource(peer, message.hash);
+    if(type === this.message.types.addedResource){
+      this._addResourcesFrom(peer, abToStr(message.data).split(','));
       return;
     }
-    this._removeResource(peer, message.hash);
-
+    if(type === this.message.types.startedDownload) {
+      this._startedDownloadFrom(peer, message.hash);
+      return;
+    }
+    this._removeResourceFrom(peer, message.hash);
   }
 
   _handleRequest(message){
@@ -334,7 +387,7 @@ class Peer {
   _handleResponse(message, responseAb) {
     const peer = this._getPeer(message.from);
     this.log('Sending request %s to peer: %s', message.hash, message.from)
-    if (responseAb.byteLength <= this.message.sizes.maxData) {
+    if (typeof responseAb === 'undefined' || responseAb.byteLength <= this.message.sizes.maxData) {
       this._sendToPeer(peer, this.message.types.response, message.hash, responseAb);
     } else {
       this._sendChunkedToPeer(peer, message.hash, responseAb);
@@ -342,8 +395,10 @@ class Peer {
   }
 
   _handleChunk(message) {
+    // this code leads to problems when a peer requests the same resource from the same peer at the same time
     const req = this._getRequest(message.from, message.hash);
     var response = {}
+    if (typeof req === 'undefined') return;
     req.chunks.push({id: message.chunkId, data: message.data});
 
     if(req.chunks.length === message.chunkCount) {
@@ -360,7 +415,6 @@ class Peer {
 
     if (req) {
       this._removeRequest(message.from, message.hash);
-      // req.respond(message.data);
       message.peerId = this.peerId
       req.respond(message)
     } else {
@@ -407,7 +461,6 @@ class Peer {
       const id = applyPadding(chunkId, s.chunkId);
       const count = applyPadding(chunkCount, s.chunkCount);
       const chunk = buildChunk(id, count, chunkAb);
-
       this._sendToPeer(peer, this.message.types.chunk, hash, chunk);
       chunkId += 1;
     }
@@ -430,14 +483,15 @@ class Peer {
     return concatAbs(chunks.map(c => c.data));
   }
 
-  _onDataChannelCreated(channel) {
+  _onDataChannelCreated(peer) {
+    var channel = peer.dataChannel;
     this.logDetail('onDataChannelCreated: %o', channel);
 
     channel.binaryType = 'arraybuffer';
 
     channel.onopen = () => {
       this.logDetail('data channel opened');
-      this._checkCache();
+      this._checkCache(peer);
     };
 
     channel.onclose = () => {
@@ -457,6 +511,7 @@ class Peer {
           break;
         case types.addedResource:
         case types.removedResource:
+        case types.startedDownload:
           this._handleUpdate(message, message.type);
           break
         case types.request:
@@ -479,6 +534,7 @@ class Peer {
       dataChannel: null,
       resources: [],
       requestQueue: [],
+      downloadingResources: []
     };
     this.removePeer(peerID);
 
@@ -487,13 +543,10 @@ class Peer {
     return peer;
   }
 
-  _peerDisconnected(e){
-
-  }
   connectTo(peerID, isInitiator = true) {
+    var peer;
     this.logDetail('creating connection as initiator? %s', isInitiator);
-
-    const peer = this.addPeer(peerID);
+    peer = this.addPeer(peerID);
 
     peer.con.onicecandidate = event => {
       this.logDetail('icecandidate event: %o', event);
@@ -511,31 +564,34 @@ class Peer {
     };
 
     peer.con.oniceconnectionstatechange = event => {
-      if(event.target.iceConnectionState == 'disconnected') {
+      if(event.target.iceConnectionState === 'disconnected' || event.target.iceConnectionState === 'closed') {
         this.removePeer(peerID);
-        this.logDetail('Disconnected');
+        this.logDetail(event.target.iceConnectionState);
       }
     }
 
     if (isInitiator) {
       this.logDetail('creating data channel');
-
       peer.dataChannel = peer.con.createDataChannel('data');
-      this._onDataChannelCreated(peer.dataChannel);
+      this._onDataChannelCreated(peer);
 
       this.logDetail('creating an offer');
-
       peer.con.createOffer().then(desc => {
         this._onLocalSessionCreated(peer.id, desc);
       });
-
     } else {
       peer.con.ondatachannel = event => {
         this.log('established connection to peer: %s', peer.id)
 
         peer.dataChannel = event.channel;
-        this._onDataChannelCreated(peer.dataChannel);
+        this._onDataChannelCreated(peer);
       };
+    }
+  }
+
+  _handleCreateDescriptionError(error) {
+    if(console) {
+      console.log("Failed to establish peer connection: " + error)
     }
   }
 
@@ -551,18 +607,20 @@ class Peer {
       this.connectTo(peerId, false);
       peer = this._getPeer(peerId);
     }
+    if(typeof peer.con === 'undefined') return;
 
     if (message.type === 'offer') {
       this.logDetail('Got offer %o. Sending answer to peer.', message);
       peer.con.setRemoteDescription(message).then(() => {
+        if(typeof peer.con === 'undefined') return;
         peer.con.createAnswer().then(desc => {
           this._onLocalSessionCreated(peer.id, desc);
         });
-      });
+      }).catch(this._handleCreateDescriptionError);
 
     } else if (message.type === 'answer') {
       this.logDetail('Got answer. %o', message);
-      peer.con.setRemoteDescription(message);
+      peer.con.setRemoteDescription(message).catch(this._handleCreateDescriptionError);
 
     } else if (message.type === 'candidate') {
       peer.con.addIceCandidate(message).then(() => {
@@ -577,7 +635,8 @@ class Peer {
 
     if (idx >= 0) {
       this.log('remove peer %s', peerId);
-      this.peers[idx].con.close();
+      let con = this.peers[idx].con;
+      this.peers[idx].con = null;
       this.peers.splice(idx, 1);
 
       let i = 0;
@@ -591,33 +650,53 @@ class Peer {
           i += 1;
         }
       }
+      con.close();
     }
   }
 
-// TODO adapt for deletes
   updatePeers(hash, msgType) {
     if(this.peers.length > 0) {
       this.logDetail('broadcast peers for %s', hash);
       this.peers.forEach(peer => {
-        this._sendToPeer(peer, msgType, hash);
+        this._sendToPeer(peer, msgType, hash, strToAb(hash));
       });
     }
+  }
+  _currentlyDownloading(resource) {
+    const peers = this.peers
+      .filter(p => p.downloadingResources.indexOf(resource) >= 0);
+    return peers;
   }
 
   requestResourceFromPeers(hash, cb) {
     this.log('try to find a peer for resource %s', hash);
-    const peers = this.peers.filter(p => p.resources.indexOf(hash) >= 0);
-    const count = peers.length;
-
+    var peers = this.peers.filter(p => p.resources.indexOf(hash) >= 0);
+    var count = peers.length;
     this.logDetail('found %d peers', count);
 
     if (count > 0) {
       const randomPeerId = Math.floor(Math.random() * count);
       const peer = peers[randomPeerId];
-
       this._requestPeer(peer, this.message.types.request, hash, cb);
     } else {
-      cb(undefined);
+      const randomPeerId = Math.floor(Math.random() * count);
+      peers = this._currentlyDownloading(hash)
+      count = peers.length
+      if(count > 0) {
+        const peer = peers[randomPeerId];
+        if(typeof this.pendingResourceRequests[peer.id] === 'undefined') {
+          this.pendingResourceRequests[peer.id] = { }
+        }
+        this.pendingResourceRequests[peer.id][hash] = { 'cb': cb }
+
+        // Send a downloading message to other peers even if you are waiting
+        // for another download to be finished. Prevents a situation where
+        // all peers are trying to download the resource from a single client
+        this.updatePeers(hash, this.message.types.startedDownload);
+      } else {
+        this.updatePeers(hash, this.message.types.startedDownload);
+        cb(undefined);
+      }
     }
   }
 }

@@ -74,6 +74,11 @@ function isClientReady(client){
 function sendMessageToClient(msg, clientID) {
   return new Promise(async function(resolve, reject) {
     const client = await clients.get(clientID);
+    var timeout = 3000;
+    if(typeof (config.fetchTimeout) !== 'undefined') {
+      timeout = Number(config.fetchTimeout);
+    }
+
     const clientReady = await isClientReady(client);
     if (typeof client === 'undefined' || !clientReady){
       resolve(false);
@@ -81,7 +86,7 @@ function sendMessageToClient(msg, clientID) {
     }
 
     const msg_chan = new MessageChannel();
-    const timeout = 2000;
+
     var receivedResponse = false;
 
     // Handler for receiving message reply from service worker
@@ -129,13 +134,16 @@ function getFromCache(key) {
 
 async function getFromClient(clientId, hash) {
   log('Try to get resource from client: ' + hash);
-  // if(!hasClientConnection){
-  //   console.log("client is not ready");
-  //   return undefined;
-  // }
   const msg = {type: 'request', hash};
   const message = await sendMessageToClient(msg, clientId);
-
+  if (message.error) {
+    log(message.error);
+    return undefined;
+  }
+  if (message.data && message.data.data.length === 0) {
+    log('Received empty message from client');
+    return undefined;
+  }
   if (message.data && message.data.data)
     return {
       'peerId': message.data.peerId,
@@ -211,7 +219,9 @@ async function putIntoCache(key, response, clientId, iteration) {
   const obj = response.clone();
   var storage = await navigator.storage.estimate();
   const usedStorage = storage.usage;
-  var futureUsage = await getRequestSize(obj);
+
+  // make space for 10 requests of the same size
+  var futureUsage = await getRequestSize(obj) * 10;
   futureUsage += usedStorage;
 
   if(!config.storageQuota ||
@@ -237,7 +247,8 @@ function logStatistic(url, method, request, timing, from, peerId) {
     'method': method,
     'from': from,
     'url': url,
-    'loadTime': timing
+    'loadTime': timing,
+    'currentTime': Date.now()
   }
   requests.push(data)
   sendStatisticToServer();
@@ -287,8 +298,9 @@ function handleRequest(url, clientId) {
           if (data && data.response) {
             var peerResponse = data.response;
             log('peerResponse ' + peerResponse.url);
-            putIntoCache(hash, peerResponse, clientId);
-            notifyPeersAboutAdd(hash, clientId);
+            putIntoCache(hash, peerResponse, clientId).then(function () {
+              notifyPeersAboutAdd(hash, clientId);
+            });
             var endTime = performance.now();
             logStatistic(
               url,
@@ -304,8 +316,9 @@ function handleRequest(url, clientId) {
           // get from the internet
           getFromInternet(url).then(response => {
             log('serverResponse ' + response.url);
-            putIntoCache(hash, response, clientId);
-            notifyPeersAboutAdd(hash, clientId);
+            putIntoCache(hash, response, clientId).then(function () {
+              notifyPeersAboutAdd(hash, clientId);
+            });
             var endTime = performance.now();
             logStatistic(url, 'serverResponse', response, endTime-startTime, 'server');
             resolve(response);
@@ -338,22 +351,33 @@ self.addEventListener('fetch', function(event) {
 });
 
 self.addEventListener('message', function(event) {
-  const msg = event.data;
-
-  if (msg.type === 'cache') {
-    getCacheKeys().then(keys => {
-      event.ports[0].postMessage(keys);
-    });
-  } else if (msg.type === 'resource') {
-    getFromCache(msg.resource).then(cacheResponse => {
-      log('cached object ' + cacheResponse);
-      cacheResponse.arrayBuffer().then(buffer => {
-        log('got buffer ' + buffer);
-        event.ports[0].postMessage(buffer, [buffer]);
+  try {
+    const msg = event.data;
+    if(typeof(event.ports[0]) === 'undefined') return undefined;
+    if (msg.type === 'cache') {
+      getCacheKeys().then(keys => {
+        event.ports[0].postMessage(keys);
       });
-    });
-  } else if (msg.type === 'status' && msg.msg === 'ready') {
-    setConfig();
-    hasClientConnection = true;
+    } else if (msg.type === 'resource') {
+      getFromCache(msg.resource).then(cacheResponse => {
+        if (typeof(cacheResponse) === 'undefined') {
+          event.ports[0].postMessage({ 'error': 'Resource not found' });
+          return;
+        }
+        log('cached object ' + cacheResponse);
+        cacheResponse.arrayBuffer().then(buffer => {
+          log('got buffer ' + buffer);
+          event.ports[0].postMessage(buffer, [buffer]);
+        });
+      });
+    } else if (msg.type === 'status' && msg.msg === 'ready') {
+      setConfig();
+      hasClientConnection = true;
+    }
+  } catch (e) {
+    log(e);
+    if (typeof event.ports[0] !== 'undefined') {
+      event.ports[0].postMessage({ 'error': e} );
+    }
   }
 });

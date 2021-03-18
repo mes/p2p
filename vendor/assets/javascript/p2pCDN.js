@@ -1,4 +1,96 @@
+var P2pCDN =
+/******/ (function(modules) { // webpackBootstrap
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
+/******/
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/
+/******/ 		// Check if module is in cache
+/******/ 		if(installedModules[moduleId]) {
+/******/ 			return installedModules[moduleId].exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = installedModules[moduleId] = {
+/******/ 			i: moduleId,
+/******/ 			l: false,
+/******/ 			exports: {}
+/******/ 		};
+/******/
+/******/ 		// Execute the module function
+/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/
+/******/ 		// Flag the module as loaded
+/******/ 		module.l = true;
+/******/
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/
+/******/
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = modules;
+/******/
+/******/ 	// expose the module cache
+/******/ 	__webpack_require__.c = installedModules;
+/******/
+/******/ 	// define getter function for harmony exports
+/******/ 	__webpack_require__.d = function(exports, name, getter) {
+/******/ 		if(!__webpack_require__.o(exports, name)) {
+/******/ 			Object.defineProperty(exports, name, { enumerable: true, get: getter });
+/******/ 		}
+/******/ 	};
+/******/
+/******/ 	// define __esModule on exports
+/******/ 	__webpack_require__.r = function(exports) {
+/******/ 		if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 			Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 		}
+/******/ 		Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 	};
+/******/
+/******/ 	// create a fake namespace object
+/******/ 	// mode & 1: value is a module id, require it
+/******/ 	// mode & 2: merge all properties of value into the ns
+/******/ 	// mode & 4: return value when already ns object
+/******/ 	// mode & 8|1: behave like require
+/******/ 	__webpack_require__.t = function(value, mode) {
+/******/ 		if(mode & 1) value = __webpack_require__(value);
+/******/ 		if(mode & 8) return value;
+/******/ 		if((mode & 4) && typeof value === 'object' && value && value.__esModule) return value;
+/******/ 		var ns = Object.create(null);
+/******/ 		__webpack_require__.r(ns);
+/******/ 		Object.defineProperty(ns, 'default', { enumerable: true, value: value });
+/******/ 		if(mode & 2 && typeof value != 'string') for(var key in value) __webpack_require__.d(ns, key, function(key) { return value[key]; }.bind(null, key));
+/******/ 		return ns;
+/******/ 	};
+/******/
+/******/ 	// getDefaultExport function for compatibility with non-harmony modules
+/******/ 	__webpack_require__.n = function(module) {
+/******/ 		var getter = module && module.__esModule ?
+/******/ 			function getDefault() { return module['default']; } :
+/******/ 			function getModuleExports() { return module; };
+/******/ 		__webpack_require__.d(getter, 'a', getter);
+/******/ 		return getter;
+/******/ 	};
+/******/
+/******/ 	// Object.prototype.hasOwnProperty.call
+/******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
+/******/
+/******/ 	// __webpack_public_path__
+/******/ 	__webpack_require__.p = "";
+/******/
+/******/
+/******/ 	// Load entry module and return exports
+/******/ 	return __webpack_require__(__webpack_require__.s = 0);
+/******/ })
+/************************************************************************/
+/******/ ([
+/* 0 */
+/***/ (function(module, exports, __webpack_require__) {
+
 "use strict";
+var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;var require;var require;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -86,15 +178,16 @@ var idbKeyval = function (e) {
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 !function (e) {
-  if ("object" == (typeof exports === "undefined" ? "undefined" : _typeof(exports)) && "undefined" != typeof module) module.exports = e();else if ("function" == typeof define && define.amd) define([], e);else {
-    var n;n = "undefined" != typeof window ? window : "undefined" != typeof global ? global : "undefined" != typeof self ? self : this, n.debug = e();
-  }
+  if ("object" == ( false ? undefined : _typeof(exports)) && "undefined" != typeof module) module.exports = e();else if (true) !(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_FACTORY__ = (e),
+				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
+				(__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__),
+				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));else { var n; }
 }(function () {
   return function e(n, t, r) {
     function o(i, a) {
       if (!t[i]) {
         if (!n[i]) {
-          var c = "function" == typeof require && require;if (!a && c) return c(i, !0);if (s) return s(i, !0);var u = new Error("Cannot find module '" + i + "'");throw u.code = "MODULE_NOT_FOUND", u;
+          var c = "function" == typeof require && require;if (!a && c) return require(i, !0);if (s) return s(i, !0);var u = new Error("Cannot find module '" + i + "'");throw u.code = "MODULE_NOT_FOUND", u;
         }var f = t[i] = { exports: {} };n[i][0].call(f.exports, function (e) {
           var t = n[i][1][e];return o(t ? t : e);
         }, f, f.exports, e, n, t, r);
@@ -299,7 +392,7 @@ var ServiceWorkerMiddleware = function () {
     value: function _initServiceWorker(config) {
       var _this = this;
 
-      var sw = navigator.serviceWorker || {};
+      var sw = navigator.serviceWorker;
 
       if (typeof sw === 'undefined' || typeof idbKeyval === 'undefined') {
         this.log("Failed to register service worker");
@@ -398,6 +491,9 @@ var ServiceWorkerMiddleware = function () {
   }, {
     key: '_initListeners',
     value: function _initListeners() {
+      if (typeof navigator.serviceWorker === 'undefined') {
+        return;
+      }
       navigator.serviceWorker.addEventListener('message', this._onServiceWorkerMessage.bind(this));
 
       document.addEventListener('sw:clientReady', this._onClientReady.bind(this));
@@ -412,7 +508,7 @@ var ServiceWorkerMiddleware = function () {
       var _this3 = this;
 
       return new Promise(function (resolve, reject) {
-        if (!navigator.serviceWorker.controller) {
+        if (!navigator.serviceWorker || !navigator.serviceWorker.controller) {
           resolve(undefined);
           return;
         }
@@ -420,7 +516,7 @@ var ServiceWorkerMiddleware = function () {
         // Handler for receiving message reply from service worker
         msg_chan.port1.onmessage = function (event) {
           if (event.data.error) {
-            reject(event.data.error);
+            resolve(undefined);
           } else {
             resolve(event.data);
           }
@@ -522,16 +618,25 @@ var Peer = function () {
 
     this.signaling = new Signaling(config);
     this.serviceWorker = new ServiceWorkerMiddleware(config);
-
-    this.stunServer = config.stunServer;
+    this.stunServer = { iceServers: [] };
+    if (config.stunServer && config.stunServer.iceServers.length !== 0 && config.stunServer.iceServers[0].urls !== '') {
+      this.stunServer = config.stunServer;
+    }
     this.peerId = this.config.clientId;
     this.peers = [];
     this.requests = [];
-    this.cacheNotification = [];
     this.channel = config.channel;
+    this.pendingResourceRequests = {};
 
     this.message = Object.freeze({
-      types: { addedResource: 1, removedResource: 2, request: 3, chunk: 4, response: 5 },
+      types: {
+        addedResource: 1,
+        removedResource: 2,
+        startedDownload: 3,
+        request: 4,
+        chunk: 5,
+        response: 6
+      },
       sizes: { // in byte
         type: 1,
         peerId: config.idLength,
@@ -628,14 +733,12 @@ var Peer = function () {
     key: '_getRequestId',
     value: function _getRequestId(from, hash) {
       var idx = -1;
-
       for (var i = 0; i < this.requests.length; i++) {
         if (this.requests[i].from === from && this.requests[i].hash === hash) {
           idx = i;
           break;
         }
       }
-
       return idx;
     }
   }, {
@@ -665,8 +768,9 @@ var Peer = function () {
       this.logDetail('local session created: %o', desc);
 
       var peer = this._getPeer(peerId);
-
+      if (typeof peer.con === 'undefined') return;
       peer.con.setLocalDescription(desc).then(function () {
+        if (typeof peer.con === 'undefined') return;
         _this.logDetail('sending local desc: %o', peer.con.localDescription);
         _this.signaling.send(peer.id, peer.con.localDescription);
       });
@@ -680,18 +784,39 @@ var Peer = function () {
     key: '_sendViaDataChannel',
     value: function _sendViaDataChannel(peer, message) {
       var state = this._getStateFor(peer);
-
+      var send = function send(msg) {
+        try {
+          // maximum buffer size is 16mb
+          if (peer.dataChannel.bufferedAmount <= 16000000) {
+            peer.dataChannel.send(msg);
+            return;
+          }
+          // if maximum buffersize is reached delay sending of chunks
+          peer.requestQueue.push(msg);
+          peer.dataChannel.bufferedAmountLowThreshold = 65536;
+          peer.dataChannel.onbufferedamountlow = function () {
+            var reqs = peer.requestQueue.slice();
+            peer.requestQueue = [];
+            reqs.forEach(function (_msg) {
+              return send(_msg);
+            });
+          };
+        } catch (error) {
+          if (console) {
+            console.log(error);
+          }
+        }
+      };
       switch (state) {
         case 'connecting':
           this.logDetail('connection not open; queueing: %s', message);
           peer.requestQueue.push(message);
           break;
         case 'open':
-          if (peer.requestQueue.length === 0) {
-            peer.dataChannel.send(message);
-          } else {
+          send(message);
+          if (peer.requestQueue.size >= 1) {
             peer.requestQueue.forEach(function (msg) {
-              return peer.dataChannel.send(msg);
+              return send(msg);
             });
             peer.requestQueue = [];
           }
@@ -720,29 +845,54 @@ var Peer = function () {
       } else {
         msg = concatAbs([typeAb, fromAb, hashAb]);
       }
-
       this._sendViaDataChannel(peer, msg);
     }
   }, {
     key: '_requestPeer',
     value: function _requestPeer(peer, msgType, hash, cb) {
+      var _this2 = this;
+
       var request = { from: peer.id, hash: hash, chunks: [], respond: cb };
 
       this.log('Request resource %s from peer %s', hash, peer.id);
       this._sendToPeer(peer, msgType, hash);
       this.requests.push(request);
+
+      // Remove request after timeout to prevent dangling requests
+      setTimeout(function () {
+        request.respond({ 'error': 'Not finished in time' });
+        _this2._removeRequest(peer.id, hash);
+      }, 20000);
     }
   }, {
     key: '_addResource',
     value: function _addResource(peer, resource) {
       if (peer.resources.indexOf(resource) === -1) {
         peer.resources.push(resource);
+        var index = peer.downloadingResources.indexOf(resource);
+        if (index !== -1) {
+          this._triggerPendingRequestsFor(peer, resource);
+          peer.downloadingResources.splice(index, 1);
+        }
         this._updateUI();
       }
     }
   }, {
-    key: '_removeResource',
-    value: function _removeResource(peer, resource) {
+    key: '_addResourcesFrom',
+    value: function _addResourcesFrom(peer, resources) {
+      for (var i = 0; i < resources.length; i += 1) {
+        this._addResource(peer, resources[i]);
+      }
+    }
+  }, {
+    key: '_startedDownloadFrom',
+    value: function _startedDownloadFrom(peer, resource) {
+      this.log('Peer %s started to download resource %s', peer.id, resource);
+      peer.downloadingResources.push(resource);
+    }
+  }, {
+    key: '_removeResourceFrom',
+    value: function _removeResourceFrom(peer, resource) {
       var index = peer.resources.indexOf(resource);
       if (index !== -1) {
         peer.resources.splice(index, 1);
@@ -751,26 +901,16 @@ var Peer = function () {
     }
   }, {
     key: '_checkCache',
-    value: function _checkCache() {
-      var _this2 = this;
+    value: function _checkCache(peer) {
+      var _this3 = this;
 
-      // TODO: extract and write test
       var cb = function cb(cachedResources) {
-        _this2.logDetail('cached resources %o', cachedResources);
+        _this3.logDetail('cached resources %o', cachedResources);
         if (cachedResources && cachedResources.length > 0) {
-          _this2.peers.forEach(function (peer) {
-            var alreadySent = _this2.cacheNotification.indexOf(peer.id) >= 0;
-
-            if (!alreadySent) {
-              cachedResources.forEach(function (hash) {
-                if (peer.dataChannel) {
-                  _this2.logDetail('update %s about cached resource %s', peer.id, hash);
-                  _this2.cacheNotification.push(peer.id);
-                  _this2._sendToPeer(peer, _this2.message.types.addedResource, hash);
-                }
-              });
-            }
-          });
+          if (peer.dataChannel) {
+            _this3.logDetail('update %s about cached resources', peer.id);
+            _this3._sendToPeer(peer, _this3.message.types.addedResource, cachedResources[0], strToAb(cachedResources.toString()));
+          }
         }
       };
       document.dispatchEvent(new CustomEvent('sw:onRequestCache', { detail: cb }));
@@ -825,16 +965,24 @@ var Peer = function () {
       }
 
       // Get response
-      if (message.type === this.message.types.response) {
+      if (message.type === this.message.types.response || message.type === this.message.types.addedResource) {
         chunkStart = chunkEnd;
         message.data = new Uint8Array(ab.slice(chunkStart));
       }
 
       return message;
     }
-
-    // TODO Adapt for delete
-
+  }, {
+    key: '_triggerPendingRequestsFor',
+    value: function _triggerPendingRequestsFor(peer, resource) {
+      var pendingRequests = this.pendingResourceRequests[peer.id];
+      if (typeof pendingRequests === 'undefined' || typeof pendingRequests[resource] === 'undefined') {
+        return;
+      }
+      var resourceRequest = pendingRequests[resource];
+      this.requestResourceFromPeers(resource, resourceRequest.cb);
+      delete this.pendingResourceRequests[peer.id][resource];
+    }
   }, {
     key: '_handleUpdate',
     value: function _handleUpdate(message, type) {
@@ -845,19 +993,23 @@ var Peer = function () {
       }
 
       this.logDetail('updated peer %s with resource %s', message.from, message.hash);
-      if (type == this.message.types.addedResource) {
-        this._addResource(peer, message.hash);
+      if (type === this.message.types.addedResource) {
+        this._addResourcesFrom(peer, abToStr(message.data).split(','));
         return;
       }
-      this._removeResource(peer, message.hash);
+      if (type === this.message.types.startedDownload) {
+        this._startedDownloadFrom(peer, message.hash);
+        return;
+      }
+      this._removeResourceFrom(peer, message.hash);
     }
   }, {
     key: '_handleRequest',
     value: function _handleRequest(message) {
-      var _this3 = this;
+      var _this4 = this;
 
       var cb = function cb(response) {
-        _this3._handleResponse(message, response);
+        _this4._handleResponse(message, response);
       };
 
       document.dispatchEvent(new CustomEvent('sw:onRequestResource', { detail: {
@@ -869,7 +1021,7 @@ var Peer = function () {
     value: function _handleResponse(message, responseAb) {
       var peer = this._getPeer(message.from);
       this.log('Sending request %s to peer: %s', message.hash, message.from);
-      if (responseAb.byteLength <= this.message.sizes.maxData) {
+      if (typeof responseAb === 'undefined' || responseAb.byteLength <= this.message.sizes.maxData) {
         this._sendToPeer(peer, this.message.types.response, message.hash, responseAb);
       } else {
         this._sendChunkedToPeer(peer, message.hash, responseAb);
@@ -878,8 +1030,10 @@ var Peer = function () {
   }, {
     key: '_handleChunk',
     value: function _handleChunk(message) {
+      // this code leads to problems when a peer requests the same resource from the same peer at the same time
       var req = this._getRequest(message.from, message.hash);
       var response = {};
+      if (typeof req === 'undefined') return;
       req.chunks.push({ id: message.chunkId, data: message.data });
 
       if (req.chunks.length === message.chunkCount) {
@@ -897,7 +1051,6 @@ var Peer = function () {
 
       if (req) {
         this._removeRequest(message.from, message.hash);
-        // req.respond(message.data);
         message.peerId = this.peerId;
         req.respond(message);
       } else {
@@ -945,7 +1098,6 @@ var Peer = function () {
         var id = applyPadding(chunkId, s.chunkId);
         var count = applyPadding(chunkCount, s.chunkCount);
         var chunk = buildChunk(id, count, chunkAb);
-
         this._sendToPeer(peer, this.message.types.chunk, hash, chunk);
         chunkId += 1;
       }
@@ -972,45 +1124,47 @@ var Peer = function () {
     }
   }, {
     key: '_onDataChannelCreated',
-    value: function _onDataChannelCreated(channel) {
-      var _this4 = this;
+    value: function _onDataChannelCreated(peer) {
+      var _this5 = this;
 
+      var channel = peer.dataChannel;
       this.logDetail('onDataChannelCreated: %o', channel);
 
       channel.binaryType = 'arraybuffer';
 
       channel.onopen = function () {
-        _this4.logDetail('data channel opened');
-        _this4._checkCache();
+        _this5.logDetail('data channel opened');
+        _this5._checkCache(peer);
       };
 
       channel.onclose = function () {
-        _this4.logDetail('data channel closed');
+        _this5.logDetail('data channel closed');
       };
 
       channel.onmessage = function (event) {
-        var message = _this4._abToMessage(event.data);
-        var types = _this4.message.types;
+        var message = _this5._abToMessage(event.data);
+        var types = _this5.message.types;
 
-        _this4.logDetail('decoded message %o', message);
+        _this5.logDetail('decoded message %o', message);
 
         // adapt for deletes
         switch (message.type) {
           case types.update:
-            _this4._handleUpdate(message);
+            _this5._handleUpdate(message);
             break;
           case types.addedResource:
           case types.removedResource:
-            _this4._handleUpdate(message, message.type);
+          case types.startedDownload:
+            _this5._handleUpdate(message, message.type);
             break;
           case types.request:
-            _this4._handleRequest(message);
+            _this5._handleRequest(message);
             break;
           case types.chunk:
-            _this4._handleChunk(message);
+            _this5._handleChunk(message);
             break;
           case types.response:
-            _this4._handleAnswer(message);
+            _this5._handleAnswer(message);
             break;
         }
       };
@@ -1023,7 +1177,8 @@ var Peer = function () {
         con: new RTCPeerConnection(this.stunServer),
         dataChannel: null,
         resources: [],
-        requestQueue: []
+        requestQueue: [],
+        downloadingResources: []
       };
       this.removePeer(peerID);
 
@@ -1032,24 +1187,21 @@ var Peer = function () {
       return peer;
     }
   }, {
-    key: '_peerDisconnected',
-    value: function _peerDisconnected(e) {}
-  }, {
     key: 'connectTo',
     value: function connectTo(peerID) {
-      var _this5 = this;
+      var _this6 = this;
 
       var isInitiator = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
 
+      var peer;
       this.logDetail('creating connection as initiator? %s', isInitiator);
-
-      var peer = this.addPeer(peerID);
+      peer = this.addPeer(peerID);
 
       peer.con.onicecandidate = function (event) {
-        _this5.logDetail('icecandidate event: %o', event);
+        _this6.logDetail('icecandidate event: %o', event);
 
         if (event.candidate) {
-          _this5.signaling.send(peer.id, {
+          _this6.signaling.send(peer.id, {
             type: 'candidate',
             label: event.candidate.sdpMLineIndex,
             id: event.candidate.sdpMid,
@@ -1061,36 +1213,41 @@ var Peer = function () {
       };
 
       peer.con.oniceconnectionstatechange = function (event) {
-        if (event.target.iceConnectionState == 'disconnected') {
-          _this5.removePeer(peerID);
-          _this5.logDetail('Disconnected');
+        if (event.target.iceConnectionState === 'disconnected' || event.target.iceConnectionState === 'closed') {
+          _this6.removePeer(peerID);
+          _this6.logDetail(event.target.iceConnectionState);
         }
       };
 
       if (isInitiator) {
         this.logDetail('creating data channel');
-
         peer.dataChannel = peer.con.createDataChannel('data');
-        this._onDataChannelCreated(peer.dataChannel);
+        this._onDataChannelCreated(peer);
 
         this.logDetail('creating an offer');
-
         peer.con.createOffer().then(function (desc) {
-          _this5._onLocalSessionCreated(peer.id, desc);
+          _this6._onLocalSessionCreated(peer.id, desc);
         });
       } else {
         peer.con.ondatachannel = function (event) {
-          _this5.log('established connection to peer: %s', peer.id);
+          _this6.log('established connection to peer: %s', peer.id);
 
           peer.dataChannel = event.channel;
-          _this5._onDataChannelCreated(peer.dataChannel);
+          _this6._onDataChannelCreated(peer);
         };
+      }
+    }
+  }, {
+    key: '_handleCreateDescriptionError',
+    value: function _handleCreateDescriptionError(error) {
+      if (console) {
+        console.log("Failed to establish peer connection: " + error);
       }
     }
   }, {
     key: 'receiveSignalMessage',
     value: function receiveSignalMessage(peerId, message) {
-      var _this6 = this;
+      var _this7 = this;
 
       //Todo: ensure that this never happens
       if (!peerId || peerId === this.peerId) {
@@ -1103,22 +1260,24 @@ var Peer = function () {
         this.connectTo(peerId, false);
         peer = this._getPeer(peerId);
       }
+      if (typeof peer.con === 'undefined') return;
 
       if (message.type === 'offer') {
         this.logDetail('Got offer %o. Sending answer to peer.', message);
         peer.con.setRemoteDescription(message).then(function () {
+          if (typeof peer.con === 'undefined') return;
           peer.con.createAnswer().then(function (desc) {
-            _this6._onLocalSessionCreated(peer.id, desc);
+            _this7._onLocalSessionCreated(peer.id, desc);
           });
-        });
+        }).catch(this._handleCreateDescriptionError);
       } else if (message.type === 'answer') {
         this.logDetail('Got answer. %o', message);
-        peer.con.setRemoteDescription(message);
+        peer.con.setRemoteDescription(message).catch(this._handleCreateDescriptionError);
       } else if (message.type === 'candidate') {
         peer.con.addIceCandidate(message).then(function () {
-          _this6.logDetail('Set addIceCandidate successfully %o', message);
+          _this7.logDetail('Set addIceCandidate successfully %o', message);
         }).catch(function (e) {
-          return _this6.log('error: %o', e);
+          return _this7.log('error: %o', e);
         });
       }
     }
@@ -1129,7 +1288,8 @@ var Peer = function () {
 
       if (idx >= 0) {
         this.log('remove peer %s', peerId);
-        this.peers[idx].con.close();
+        var con = this.peers[idx].con;
+        this.peers[idx].con = null;
         this.peers.splice(idx, 1);
 
         var i = 0;
@@ -1143,22 +1303,28 @@ var Peer = function () {
             i += 1;
           }
         }
+        con.close();
       }
     }
-
-    // TODO adapt for deletes
-
   }, {
     key: 'updatePeers',
     value: function updatePeers(hash, msgType) {
-      var _this7 = this;
+      var _this8 = this;
 
       if (this.peers.length > 0) {
         this.logDetail('broadcast peers for %s', hash);
         this.peers.forEach(function (peer) {
-          _this7._sendToPeer(peer, msgType, hash);
+          _this8._sendToPeer(peer, msgType, hash, strToAb(hash));
         });
       }
+    }
+  }, {
+    key: '_currentlyDownloading',
+    value: function _currentlyDownloading(resource) {
+      var peers = this.peers.filter(function (p) {
+        return p.downloadingResources.indexOf(resource) >= 0;
+      });
+      return peers;
     }
   }, {
     key: 'requestResourceFromPeers',
@@ -1168,16 +1334,31 @@ var Peer = function () {
         return p.resources.indexOf(hash) >= 0;
       });
       var count = peers.length;
-
       this.logDetail('found %d peers', count);
 
       if (count > 0) {
         var randomPeerId = Math.floor(Math.random() * count);
         var peer = peers[randomPeerId];
-
         this._requestPeer(peer, this.message.types.request, hash, cb);
       } else {
-        cb(undefined);
+        var _randomPeerId = Math.floor(Math.random() * count);
+        peers = this._currentlyDownloading(hash);
+        count = peers.length;
+        if (count > 0) {
+          var _peer = peers[_randomPeerId];
+          if (typeof this.pendingResourceRequests[_peer.id] === 'undefined') {
+            this.pendingResourceRequests[_peer.id] = {};
+          }
+          this.pendingResourceRequests[_peer.id][hash] = { 'cb': cb
+
+            // Send a downloading message to other peers even if you are waiting
+            // for another download to be finished. Prevents a situation where
+            // all peers are trying to download the resource from a single client
+          };this.updatePeers(hash, this.message.types.startedDownload);
+        } else {
+          this.updatePeers(hash, this.message.types.startedDownload);
+          cb(undefined);
+        }
       }
     }
   }]);
@@ -1210,7 +1391,7 @@ var SystemTest = function () {
           return false;
         }
       }
-      return true;
+      return typeof navigator.serviceWorker !== 'undefined';
     }
   }, {
     key: 'webrtcInitialized',
@@ -1261,11 +1442,13 @@ var _createClass = function () { function defineProperties(target, props) { for 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var P2pCDN = function () {
-  // TOdo apply to peer
   function P2pCDN(config) {
     _classCallCheck(this, P2pCDN);
 
     if (!config.clientId) return;
+    this.systemTest = new SystemTest(this);
+
+    if (!this.systemTest.testBrowser()) return;
 
     var idLength = config.idLength;
     if (config.logLevel === 'all') {
@@ -1282,7 +1465,6 @@ var P2pCDN = function () {
       config.clientId = "0".repeat(adjustCount) + config.clientId;
     }
 
-    this.systemTest = new SystemTest(this);
     this.peer = new Peer(config);
   }
 
@@ -1295,6 +1477,8 @@ var P2pCDN = function () {
 
   return P2pCDN;
 }();
+
+module.exports = P2pCDN;
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -1578,3 +1762,6 @@ function concatAbs(abs) {
 
   return result;
 }
+
+/***/ })
+/******/ ]);
