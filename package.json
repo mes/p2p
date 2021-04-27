@@ -1,6 +1,6 @@
 {
   "name": "webrtc-p2p-cdn",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "A javascript and nodejs module to enable a webrtc based peer to peer CDN.",
   "main": "index.js",
   "scripts": {
@@ -15,7 +15,7 @@
   "license": "ISC",
   "dependencies": {
     "faye": "^1.2.4",
-    "npm": "^6.5.0",
+    "npm": "^6.10.1",
     "socket.io": "^2.1.0"
   },
   "devDependencies": {
@@ -28,7 +28,7 @@
     "babel-preset-stage-0": "^6.24.1",
     "chai": "^4.2.0",
     "debug": "^3.1.0",
-    "karma": "^3.0.0",
+    "karma": "^4.2.0",
     "karma-chai": "^0.1.0",
     "karma-chrome-launcher": "^2.2.0",
     "karma-mocha": "^1.3.0",
@@ -37,6 +37,8 @@
     "mocha": "^5.2.0",
     "node-minify": "^3.0.1",
     "sinon": "^7.1.0",
-    "sinon-chai": "^3.2.0"
+    "sinon-chai": "^3.2.0",
+    "webpack": "^4.41.2",
+    "webpack-cli": "^3.3.10"
   }
 }
